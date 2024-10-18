@@ -14,7 +14,7 @@ import {VRFV2PlusClient} from "../lib/chainlink-brownie-contracts/contracts/src/
 contract Raffle is VRFConsumerBaseV2Plus{
     /**Errors */
     error Raffle_NotEnoughEth();
-    error PickWinner_RuffleWasEnded();
+    error PickWinner_UpKeepNotNeeded();
     error Ruffle_TransferFailed();
     error Raffle_RaffleWasEnded();
   
@@ -72,10 +72,31 @@ contract Raffle is VRFConsumerBaseV2Plus{
         emit RuffleEntered(msg.sender);
     }
 
-    function pickWinner() external {
+    
+
+
+    /**
+    * @dev Спец функция с chainlink которая проверяет, не истикло ли время лотереи, если истекло 
+    * то следует выбрать победителя(это значит автоматически будет вызвана функция определения победителя pickWinner)
+    * @param - ignored
+    * @return upKeepNeeded - true if нужно перезапустить лотерею и найти победителя для первого розыгрыша 
+    * @return - ignored
+    */
+    function checkUpKeep(bytes memory /*checkData */) public view returns(bool upKeepNeeded, bytes memory /* performData */) {
+        bool timeHasPased = ((block.timestamp - s_lastTimeStamp) >= i_interval);
+        bool isOpen = s_ruffleState == RuffleState.OPEN;
+        bool hasBalance = address(this).balance > 0;
+        bool hasPlayers = s_players.length > 0;
+
+        upKeepNeeded = timeHasPased && isOpen && hasBalance && hasPlayers;
+        return (upKeepNeeded, hex"");
+    } 
+
+    function pickWinner(bytes calldata /* performData */) external {
         // check to see if enough time has passed
-        if ((block.timestamp - s_lastTimeStamp) < i_interval) {
-            revert PickWinner_RuffleWasEnded();
+        (bool upkeepNeeded, ) = checkUpKeep("");
+        if (upkeepNeeded) {
+            revert PickWinner_UpKeepNotNeeded(); // можно добавить параметры
         }
 
         s_ruffleState = RuffleState.CALCULATING;
