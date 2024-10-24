@@ -11,7 +11,6 @@ contract DeployRaffle is Script {
     function deployContract() public returns(Raffle, HelperConfig) {
         HelperConfig helperConfig = new HelperConfig();
 
-
         // if we use local network, we calling getOrCreateAnvilEthConfig()
         // or if we use sepolia or something like that, we callig getSepoliaEthConfig()
         // local => deploy mocks, get local config
@@ -19,7 +18,15 @@ contract DeployRaffle is Script {
         HelperConfig.NetworkConfig memory config = helperConfig.getConfig();
 
         vm.startBroadcast();
-        Raffle raffle = new Raffle();
+        Raffle raffle = new Raffle(
+            config.entranceFee,
+            config.interval,
+            config.vrfCoordinator,
+            config.gasLine,
+            config.subscriptionId,
+            config.callbackGasLimit
+        );
         vm.stopBroadcast();
+        return (raffle, helperConfig);
     }
 }

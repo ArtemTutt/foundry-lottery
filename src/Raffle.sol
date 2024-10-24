@@ -67,7 +67,7 @@ contract Raffle is VRFConsumerBaseV2Plus {
         s_ruffleState = RuffleState.OPEN;
     }
 
-    function enterRuffle() external payable {
+    function enterRaffle() external payable {
         // require(msg.value >= i_entranceFee, "Not enough ETh to enter raffle");
         // if (msg.value < i_entranceFee) {
         //     revert NotEnoughEth();
@@ -77,7 +77,10 @@ contract Raffle is VRFConsumerBaseV2Plus {
             revert Raffle_RaffleWasEnded();
         }
 
-        require(msg.value >= i_entranceFee, Raffle_NotEnoughEth());
+        if (msg.value < i_entranceFee) {
+            revert Raffle_NotEnoughEth();
+        }
+
         s_players.push(payable(msg.sender));
 
         emit RuffleEntered(msg.sender);
@@ -159,5 +162,13 @@ contract Raffle is VRFConsumerBaseV2Plus {
 
     function getRecentWinner() public view returns (address) {
         return s_recentWinner;
+    }
+
+    function getRaffleState() external view returns (RuffleState) {
+        return s_ruffleState;
+    }
+
+    function getPlayer(uint indexOfPlayer) external view returns(address){
+        return s_players[indexOfPlayer];
     }
 }
