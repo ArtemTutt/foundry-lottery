@@ -85,7 +85,110 @@ contract RaffleTest is Test {
 
     }
 
-    function testRaffleenterRaffle() public  {
+    function testcheckUpKeepReturnsFalseIfItHasNoBalance() public {
+        // Arrange
+        vm.prank(PLAYER); // мы не передали денежные средства 
+        // Act / Asset
+        vm.warp(block.timestamp + interval + 1);
+        vm.roll(block.number + 1);
 
+        (bool upkeeper, ) = raffle.checkUpKeep("");
+
+        assert(!upkeeper);
+    }
+
+    function testCheckUpKeepReturnsTrueWhenParametrsAreGood() public {
+        // Arrange
+        vm.prank(PLAYER); // мы не передали денежные средства
+
+        raffle.enterRaffle{value: entranceFee}();
+
+        // we did enterRaffle => s_players have people, contract has balance
+        assert(raffle.getRaffleState() == Raffle.RuffleState.OPEN);
+        (bool upkeeper, ) = raffle.checkUpKeep("");
+
+        assert(upkeeper);
+    }
+
+    function testPerformUpKeepCanOnlyRunIfCheckUpKeepIsTrue() public {
+        // Arrange
+        vm.startPrank(PLAYER); // мы не передали денежные средства
+        raffle.enterRaffle{value: entranceFee}();
+        vm.stopPrank();
+        vm.warp(block.timestamp + interval + 1);
+        vm.roll(block.number + 1);
+        (bool upkeepNeeded,) = raffle.checkUpKeep("");
+        // Act
+
+        raffle.pickWinner("");
+
+        console.log(raffle.getRaffleState() == Raffle.RuffleState.CALCULATING);
+    }
+
+
+    function testPerformUpKeepRevertIfCheckUpKeepIsTrue() public {
+        // Arrange
+        vm.startPrank(PLAYER); // мы не передали денежные средства
+        vm.stopPrank();
+        vm.warp(block.timestamp + interval + 1);
+        vm.roll(block.number + 1);
+        (bool upkeepNeeded,) = raffle.checkUpKeep("");
+        // Act
+
+        vm.expectRevert(Raffle.PickWinner_UpKeepNotNeeded.selector);
+
+        raffle.pickWinner("");
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                           Check Getter Function
+    //////////////////////////////////////////////////////////////*/
+
+    function testCheckGetEntranceFee() public {
+        // Arrange
+        vm.prank(PLAYER);
+        // Act / Asset
+
+        raffle.enterRaffle{value: entranceFee}();
+
+        console.log(entranceFee);
+        console.log(raffle.getEntranceFee());
+
+        assert(raffle.getEntranceFee() == 1e16);
+    }
+
+    function testCheckGetRecentWinner () public {
+        // didn implemented pickWinner yet => RecentWinner == address(0)
+        // Arrange
+        vm.prank(PLAYER);
+        // Act / Asset
+
+        raffle.enterRaffle{value: entranceFee}();
+
+        address recWinner = raffle.getRecentWinner();
+
+        console.log(recWinner);
+
+        assert(recWinner == address(0));
+    }
+
+    function testCheckGetRaffleState () public {
+        // Arrange
+        vm.prank(PLAYER);
+        // Act / Asset
+
+        raffle.enterRaffle{value: entranceFee}();
+
+        assert(raffle.getRaffleState() == Raffle.RuffleState.OPEN);
+    }
+
+    function testCheckGetPlayer() public {
+        // Arrange
+        vm.prank(PLAYER);
+        // Act / Asset
+
+        raffle.enterRaffle{value: entranceFee}();
+
+        assert(raffle.getPlayer(0) == PLAYER);
     }
 }
