@@ -112,7 +112,7 @@ contract RaffleTest is Test {
 
     function testPerformUpKeepCanOnlyRunIfCheckUpKeepIsTrue() public {
         // Arrange
-        vm.startPrank(PLAYER); // мы не передали денежные средства
+        vm.startPrank(PLAYER);
         raffle.enterRaffle{value: entranceFee}();
         vm.stopPrank();
         vm.warp(block.timestamp + interval + 1);
@@ -190,5 +190,14 @@ contract RaffleTest is Test {
         raffle.enterRaffle{value: entranceFee}();
 
         assert(raffle.getPlayer(0) == PLAYER);
+    }
+
+
+    /*//////////////////////////////////////////////////////////////
+                           FULFILLRANDOMWORDS
+    //////////////////////////////////////////////////////////////*/
+
+    function testFulFillRandomWordsOnlyBeColdAfterPickWinner() public {
+        
     }
 }
