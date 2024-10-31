@@ -200,4 +200,26 @@ contract RaffleTest is Test {
     function testFulFillRandomWordsOnlyBeColdAfterPickWinner() public {
         
     }
+
+    // function testAllFunctional() public {
+    //     // Arrange 
+    //     uint256 additionalEtrants = 3;
+    //     uint startingIndex = 1;
+
+    //     for (uint i = startingIndex; i < startingIndex + additionalEtrants; i++) {
+    //         address newPlayer = address(uint160(i));
+    //         hoax(newPlayer, 1 ether);
+    //         raffle.enterRaffle{value: entranceFee}();
+    //     }
+
+    //     uint256 startingTimeStamp = raffle.getLastTimeStamp();
+
+    //     // Act
+
+    //     // Assert 
+    //     address rrecentWinner = raffle.getRecentWinner();
+    //     Raffle.RuffleState raffleState = reffle.getRaffleState();
+
+    //     uint256 winnerBalance = rrecentWinner.balance;
+    // }
 }
